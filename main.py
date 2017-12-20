@@ -57,13 +57,26 @@ def main_control(out_queue, resolution, n_seconds=5):
     def ctrl_c(signum, frame):
         print("STOP")
         should_exit[0] = True
+        s_per_loop = np.mean(times)
+        del time_processing[0]
+        s_per_loop_image = np.mean(time_processing)
+
+        print("Control loop: {:.2f}ms per loop | {} fps".format(s_per_loop * 1000, int(1 / s_per_loop)))
+        print("Image: {:.2f}ms per loop | {} fps".format(s_per_loop_image * 1000, int(1 / s_per_loop_image)))
 
     signal.signal(signal.SIGINT, ctrl_c)
     last_time = time.time()
+    times = []
+    time_processing = []
+    last_time_queue = time.time()
+    other_time = []
 
     while time.time() - start_time < n_seconds and not should_exit[0]:
         # Output of image processing
+        start_time = time.time()
         turn_percent, centroids = out_queue.get()
+        time_processing.append(time.time() - start_time)
+
         # print(centroids)
         # Compute the error to the center of the line
         # Here we use the farthest centroids
@@ -94,6 +107,7 @@ def main_control(out_queue, resolution, n_seconds=5):
         # PID Control
         # TODO: add dt in the equation
         dt = time.time() - last_time
+        times.append(dt)
         u_angle = Kp * error + Kd * errorD + Ki * errorI
         # Update integral error
         errorI += error

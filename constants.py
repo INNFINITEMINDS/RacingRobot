@@ -16,7 +16,7 @@ Kp_turn = 40
 Kp_line = 35
 Kd = 30
 Ki = 0.0
-FPS = 60
+FPS = 90
 N_SECONDS = 77  # number of seconds before exiting the program
 ALPHA = 0.8  # alpha of the moving mean for the turn coefficient
 
